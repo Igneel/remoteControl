@@ -16,7 +16,7 @@ TSDIAppForm *SDIAppForm;
 
 HANDLE Port; // Дескриптор порта
 			   // имена портов на чтение и запись
-TCHAR PortName[MAX_PATH] = TEXT("COM7");
+TCHAR PortName[MAX_PATH] = TEXT("\\\\.\\COM2"); // если что-то не работает, проверить соответствие
 
 HANDLE openPort(TCHAR * data);
 HANDLE openPort(TCHAR * data)
@@ -158,7 +158,7 @@ if(feedback>0)
 	do
 	{
 
-		dataRead[i] = ct2 & 111; //127
+		dataRead[i] = ct2;// & 111; //127
 		ReadFile(Port, &ct2, sizeof(ct2), &feedback, NULL);
 		i++;
 	}
@@ -177,7 +177,7 @@ Memo1->Lines->Add(dataRead);
 void __fastcall TSDIAppForm::SendButtonClick(TObject *Sender)
 {
 
-char data[30]={'o'};
+char *data=AnsiString(Edit2->Text).c_str();
 DWORD feedback;
 LONG lResult=1; //Помещаем сюда количество данных, которые
 int i=0;
@@ -203,12 +203,9 @@ if(Port != INVALID_HANDLE_VALUE)
 }
 //---------------------------------------------------------------------------
 
-
-
-
-
 // для отладки - посылает значения от 00 до 0хFF и читает полученные значения
 // после чего сохраняет в файл
+// отладочная функция, в релизе её не будет.
 void __fastcall TSDIAppForm::Button1Click(TObject *Sender)
 {
 TStringList *t=new TStringList();
@@ -235,5 +232,12 @@ t->SaveToFile(SaveDialog->FileName);
 
 
 //---------------------------------------------------------------------------
+
+
+
+
+
+
+
 
 
