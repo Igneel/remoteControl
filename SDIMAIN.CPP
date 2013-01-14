@@ -8,6 +8,30 @@
 #pragma resource "*.dfm"
 TSDIAppForm *SDIAppForm;
 
+
+
+// --------------------------------------------------------------------------
+const int WorldSize=30;
+int H[WorldSize][WorldSize]={0};  //  стоимость
+int h_evr[WorldSize][WorldSize]={0}; // эвристика
+int map[WorldSize][WorldSize]={0};   // карта, с металлическими объектами
+
+void SendData(char * data);
+bool started=0;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /*
 ѕри установке св€зи система выдел€ет два ком-порта дл€ взаимодействи€ с усройством
 ’от€ при работе собственно используетс€ только один порт, самый простой способ его найти -
@@ -16,7 +40,7 @@ TSDIAppForm *SDIAppForm;
 
 HANDLE Port; // ƒескриптор порта
 			   // имена портов на чтение и запись
-TCHAR PortName[MAX_PATH] = TEXT("\\\\.\\COM2"); // если что-то не работает, проверить соответствие
+TCHAR PortName[MAX_PATH] = TEXT("\\\\.\\COM10"); // если что-то не работает, проверить соответствие
 
 HANDLE openPort(TCHAR * data);
 HANDLE openPort(TCHAR * data)
@@ -178,6 +202,8 @@ void __fastcall TSDIAppForm::SendButtonClick(TObject *Sender)
 {
 
 char *data=AnsiString(Edit2->Text).c_str();
+data[0]='\r';
+data[1]='\0';
 DWORD feedback;
 LONG lResult=1; //ѕомещаем сюда количество данных, которые
 int i=0;
@@ -229,15 +255,140 @@ t->SaveToFile(SaveDialog->FileName);
 
 
 }
+void GetData(char *buffer);
 
+//„тение данных по таймеру:
+void GetData(char *dataRead)
+{
+if(Port)
+{
+DWORD feedback;
+feedback = 1;
+int i=0;
+ char ct2=0;
 
+//ѕопытка чтени€ первого символа хран€щегос€ в COM-порте
+ReadFile(Port, &ct2, sizeof(ct2), &feedback, NULL);
+if(feedback>0)
+{
+//≈сли чтение удалось продолжаем чтение пока не встретитс€ символ #13
+	do
+	{
+
+		dataRead[i] = ct2;
+		ReadFile(Port, &ct2, sizeof(ct2), &feedback, NULL);
+		i++;
+	}
+	while(feedback>0 && i<254);
+	dataRead[i] = '\0';
+}
+}
+}
 //---------------------------------------------------------------------------
+void Interracting()
+{
+if(!Port) return;
+
+
+char dataRead[256] = {0};
+GetData(dataRead);
+if(dataRead[0]=='\0')
+{
+if(!started)
+SendData("temp");
+return;
+}
+String s=dataRead;
+SDIAppForm->Memo1->Lines->Add("get:");
+SDIAppForm->Memo1->Lines->Add(s);
+String command=strtok(dataRead," \n\r");
+String data1=strtok(NULL," \n\r");
+String data2=strtok(NULL," \n\r");
+String data3=strtok(NULL," \n\r");
+int d3;
+
+
+if(data3!=NULL) // если это получение параметра
+{
+;
+}
+if(TryStrToInt(data3,d3)) // если это установка параметра
+{
+	if(command=="Hint")
+	H[StrToInt(data1)][StrToInt(data2)]=d3;
+	if(command=="hevr")
+	h_evr[StrToInt(data1)][StrToInt(data2)]=d3;
+	if(command=="metall")
+	map[StrToInt(data1)][StrToInt(data2)]=d3;
+
+
+	;
+}
+else
+{
+ if(command=="start")
+	{
+	char temp=StrToInt(SDIAppForm->Edit3->Text);
+	if(temp==13)
+	started=1;
+	SendData(&temp);
+	}
+	if(command=="jobisdone?")
+	{
+	char temp=StrToInt(SDIAppForm->Edit4->Text);
+
+	SendData(&temp);
+	}
+	if(command=="Hint")
+	{
+	char temp=H[StrToInt(data1)][StrToInt(data2)];
+	SendData(&temp);
+	}
+	if(command=="H+hevr")
+	{
+	char temp=H[StrToInt(data1)][StrToInt(data2)]+h_evr[StrToInt(data1)][StrToInt(data2)];
+	SendData(&temp);
+	}
+	if(command=="hevr")
+	{
+	char temp=h_evr[StrToInt(data1)][StrToInt(data2)];
+	SendData(&temp);
+	}
+}
+
+
+
+
+}
+
+void SendData(char * data)
+{
+SDIAppForm->Memo1->Lines->Add("send");
+SDIAppForm->Memo1->Lines->Add(data);
+SDIAppForm->Memo1->Lines->Add(IntToStr(*data));
+DWORD feedback;
+LONG lResult=1; //ѕомещаем сюда количество данных, которые
+int i=0;
+// необходимо передать
+if((!WriteFile(Port, &data[0], lResult*sizeof(data[0]), &feedback, 0) || feedback != lResult*sizeof(data[i])))
+{
+	CloseHandle(Port);
+	Port = INVALID_HANDLE_VALUE;
+}
+
+}
 
 
 
 
 
 
+void __fastcall TSDIAppForm::Button2Click(TObject *Sender)
+{
+Interracting();
+
+}
+//---------------------------------------------------------------------------
 
 
 
