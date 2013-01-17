@@ -2,31 +2,34 @@ object SDIAppForm: TSDIAppForm
   Left = 197
   Top = 111
   Caption = 'SDI Application'
-  ClientHeight = 310
-  ClientWidth = 528
+  ClientHeight = 740
+  ClientWidth = 1063
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
-  Font.Height = -13
+  Font.Height = -12
   Font.Name = 'System'
   Font.Style = []
   Menu = MainMenu1
   OldCreateOrder = False
+  OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 16
   object StatusBar: TStatusBar
     Left = 0
-    Top = 291
-    Width = 528
+    Top = 721
+    Width = 1063
     Height = 19
     AutoHint = True
     Panels = <>
     SimplePanel = True
+    ExplicitTop = 372
+    ExplicitWidth = 613
   end
   object ToolBar1: TToolBar
     Left = 0
     Top = 0
-    Width = 528
+    Width = 1063
     Height = 30
     BorderWidth = 1
     Color = clBtnFace
@@ -37,6 +40,7 @@ object SDIAppForm: TSDIAppForm
     ShowHint = True
     TabOrder = 1
     Wrapable = False
+    ExplicitWidth = 613
     object ToolButton9: TToolButton
       Left = 5
       Top = 0
@@ -135,6 +139,50 @@ object SDIAppForm: TSDIAppForm
     Caption = 'Button1'
     TabOrder = 8
     OnClick = Button1Click
+  end
+  object Button2: TButton
+    Left = 296
+    Top = 104
+    Width = 75
+    Height = 25
+    Caption = 'Button2'
+    TabOrder = 9
+    OnClick = Button2Click
+  end
+  object Edit3: TEdit
+    Left = 448
+    Top = 48
+    Width = 121
+    Height = 24
+    TabOrder = 10
+    Text = '13'
+  end
+  object Edit4: TEdit
+    Left = 448
+    Top = 88
+    Width = 121
+    Height = 24
+    TabOrder = 11
+    Text = '10'
+  end
+  object StringGrid1: TStringGrid
+    Left = 471
+    Top = 129
+    Width = 578
+    Height = 576
+    ColCount = 30
+    DefaultColWidth = 18
+    DefaultRowHeight = 18
+    FixedCols = 0
+    RowCount = 30
+    FixedRows = 0
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -12
+    Font.Name = 'System'
+    Font.Style = []
+    ParentFont = False
+    TabOrder = 12
   end
   object MainMenu1: TMainMenu
     Images = ImageList1
@@ -257,7 +305,7 @@ object SDIAppForm: TSDIAppForm
     Left = 72
     Top = 152
     Bitmap = {
-      494C01010F001300800010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C01010F001300880010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000004000000001002000000000000040
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -803,8 +851,8 @@ object SDIAppForm: TSDIAppForm
     Top = 152
   end
   object Timer1: TTimer
-    Enabled = False
-    OnTimer = GetButtonClick
+    Interval = 10
+    OnTimer = Button2Click
     Left = 64
     Top = 208
   end

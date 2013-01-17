@@ -18,6 +18,7 @@
 #include <ImgList.hpp>
 #include <StdActns.hpp>
 #include <ToolWin.hpp>
+#include <Grids.hpp>
 //----------------------------------------------------------------------------
 class TSDIAppForm : public TForm
 {
@@ -65,7 +66,11 @@ __published:
 	TEdit *Edit2;
 	TButton *DisconnectButton;
 	TTimer *Timer1;
-	TButton *Button1;void __fastcall FileNew1Execute(TObject *Sender);
+	TButton *Button1;
+	TButton *Button2;
+	TEdit *Edit3;
+	TEdit *Edit4;
+	TStringGrid *StringGrid1;void __fastcall FileNew1Execute(TObject *Sender);
         void __fastcall FileOpen1Execute(TObject *Sender);
         void __fastcall FileSave1Execute(TObject *Sender);
         void __fastcall FileExit1Execute(TObject *Sender);
@@ -75,6 +80,8 @@ __published:
 	void __fastcall SendButtonClick(TObject *Sender);
 	void __fastcall DisconnectButtonClick(TObject *Sender);
 	void __fastcall Button1Click(TObject *Sender);
+	void __fastcall Button2Click(TObject *Sender);
+	void __fastcall FormCreate(TObject *Sender);
 private:
 public:
     virtual __fastcall TSDIAppForm(TComponent *AOwner);
