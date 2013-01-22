@@ -70,7 +70,8 @@ __published:
 	TButton *Button2;
 	TEdit *Edit3;
 	TEdit *Edit4;
-	TStringGrid *StringGrid1;void __fastcall FileNew1Execute(TObject *Sender);
+	TStringGrid *StringGrid1;
+	TStringGrid *StringGrid2;void __fastcall FileNew1Execute(TObject *Sender);
         void __fastcall FileOpen1Execute(TObject *Sender);
         void __fastcall FileSave1Execute(TObject *Sender);
         void __fastcall FileExit1Execute(TObject *Sender);

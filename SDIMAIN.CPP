@@ -276,38 +276,86 @@ void GetData(char *dataRead)
 		}
 	}
 }
+
+	String command;//=strtok(dataRead," \n\r"); // распознаем команду
+	String data1;//=strtok(NULL," \n\r");       // выделяем первую координату
+	String data2;//=strtok(NULL," \n\r");       // вторую координату
+	String data3;//=strtok(NULL," \n\r");       // и третий параметр, если есть
 //---------------------------------------------------------------------------
-void Interracting() // функция взаимодействия с роботом.
+void Obrabotka();
+int cxx=0,cyy=0;
+void Interracting(String data="") // функция взаимодействия с роботом.
 {
+	String s;
+
 	if(!Port) return; // если нет соединения - пока делать нечего
 	char dataRead[256] = {0}; // выделяем память для сообщения
-	GetData(dataRead);   // читаем данные, пока они не кончатся, или не встретим \r
-	if(dataRead[0]=='\0') // если пусто - делать пока нечего.
+	if(data!="")
 	{
-		if(!started)
-			SendData("temp");
-		return;
+	for(int i=1;i<data.Length();i++)
+	dataRead[i]=data.operator [](i);
+	s=data;
 	}
-	String s=dataRead;
+	else
+	{
+		GetData(dataRead);   // читаем данные, пока они не кончатся, или не встретим \r
+		if(dataRead[0]=='\0') // если пусто - делать пока нечего.
+		{
+			if(!started)
+				SendData("temp");
+			return;
+		}
+		s=dataRead;
+    }
+
 	SDIAppForm->Memo1->Lines->Add("get:"); // для протокола и отладки выводим полученную строку на экран
 	SDIAppForm->Memo1->Lines->Add(s);
-	String command=strtok(dataRead," \n\r"); // распознаем команду
-	String data1=strtok(NULL," \n\r");       // выделяем первую координату
-	String data2=strtok(NULL," \n\r");       // вторую координату
-	String data3=strtok(NULL," \n\r");       // и третий параметр, если есть
-	int d3;      // здесь будем хранить числовое значение третьего параметра
+	command=strtok(dataRead," \n\r"); // распознаем команду
+	data1=strtok(NULL," \n\r");       // выделяем первую координату
+	data2=strtok(NULL," \n\r");       // вторую координату
+	data3=strtok(NULL," \n\r");       // и третий параметр, если есть
+	String next=strtok(NULL,""); // другие команды если есть
 
-	if(TryStrToInt(data3,d3)) // если это установка параметра
+
+
+	if(data3.Length()!=0) // если это установка параметра
 	{
+	int d3=StrToInt(data3);
+	char temp='A';
+		if(command=="max") // установка значения для карты
+		{
+			int maxX=StrToInt(data1);
+			int maxY=StrToInt(data2);
+			for(int i=maxX+1;i<WorldSize;i++)
+			for(int j=0;j<WorldSize;j++)
+			H[i][j]=50;
+			for(int i=0;i<WorldSize;i++)
+			for(int j=maxY;j<WorldSize;j++)
+			H[i][j]=50;
+			SendData(&temp);
+		}
 		if(command=="Hint") // установка значения для карты
+		{
+
 			H[StrToInt(data1)][StrToInt(data2)]=d3;
+			SendData(&temp);
+		}
 		if(command=="hevr") // установка значения для эвристики
+		{
 			h_evr[StrToInt(data1)][StrToInt(data2)]=d3;
-		if(command=="metall") // установка для карты металлических объектов.
+			SendData(&temp);
+		}
+		if(command=="Metall") // установка для карты металлических объектов.
+		{
 			map[StrToInt(data1)][StrToInt(data2)]=d3;
+			SendData(&temp);
+		}
+
+		SDIAppForm->FormCreate(NULL);
 	}
 	else // если это получение параметра
 	{
+	data2=data2.SubString(1,data2.Length()-1);
 		if(command=="start") // начало работы.
 		{
 			char temp=StrToInt(SDIAppForm->Edit3->Text);
@@ -335,7 +383,40 @@ void Interracting() // функция взаимодействия с роботом.
 			char temp=h_evr[StrToInt(data1)][StrToInt(data2)];
 			SendData(&temp);
 		}
+		if(command=="Calc")
+		{
+		int min,temp;
+		min=H[StrToInt(data1)][StrToInt(data2)+1]+h_evr[StrToInt(data1)][StrToInt(data2)+1];//getParam("H+hevr",cX,cY+1);
+        cxx=0;
+        cyy=1;
+		for(int i=-1;i<=1;i++) //
+        {
+           for(int j=-1;j<=1;j++)//----------------------------------------------------------------------------------------------------------------------!!!!!
+			  { //
+				  if(i==0 && j==0) continue;
+                  temp=H[StrToInt(data1)+i][StrToInt(data2)+j]+h_evr[StrToInt(data1)+i][StrToInt(data2)+j];//getParam("H+hevr",cX+i,cY+j);
+				  if(temp<min) //
+				  {            //
+					 min=temp;
+                     cxx=i;
+                     cyy=j;
+                  }
+              }
+		}
+		char temp1=cxx;
+		SendData(&temp1);
+		}
+		if(command=="Calc2")
+		{
+			char temp1=cyy;
+			SendData(&temp1);
+        }
 	}
+	if(next!="" && next!=" ")
+	{
+	Interracting(next);
+	}
+
 	}
 
 void SendData(char * data)
@@ -355,10 +436,6 @@ void SendData(char * data)
 }
 
 
-
-
-
-
 void __fastcall TSDIAppForm::Button2Click(TObject *Sender)
 {
 	Interracting();
@@ -368,7 +445,14 @@ void __fastcall TSDIAppForm::FormCreate(TObject *Sender)
 {
 	for(int i=0;i<StringGrid1->ColCount;i++)
 		for(int j=0;j<StringGrid1->ColCount;j++)
-			StringGrid1->Cells[j][i]=H[i][j];
+			StringGrid1->Cells[j][i]=map[i][j];
+	for(int i=0;i<StringGrid2->ColCount;i++)
+		for(int j=0;j<StringGrid2->ColCount;j++)
+			StringGrid2->Cells[j][i]=H[i][j]+h_evr[i][j];
 }
 //---------------------------------------------------------------------------
+void Obrabotka()
+{
+
+}
 
