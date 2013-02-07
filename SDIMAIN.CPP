@@ -268,11 +268,14 @@ void GetData(char *dataRead)
 			do
 			{
 				dataRead[i] = ct2;
+
+
 				ReadFile(Port, &ct2, sizeof(ct2), &feedback, NULL);
 				i++;
 			}
-			while(feedback>0 && i<254);
+			while(feedback>0);
 				dataRead[i] = '\0';
+				if(i<28) dataRead[0]='\0';
 		}
 	}
 }
@@ -290,14 +293,14 @@ void Interracting(String data="") // функци€ взаимодействи€ с роботом.
 
 	if(!Port) return; // если нет соединени€ - пока делать нечего
 	char dataRead[256] = {0}; // выдел€ем пам€ть дл€ сообщени€
-	if(data!="")
+	/*if(data!="")
 	{
 	for(int i=1;i<data.Length();i++)
 	dataRead[i]=data.operator [](i);
 	s=data;
 	}
 	else
-	{
+	{   */
 		GetData(dataRead);   // читаем данные, пока они не кончатс€, или не встретим \r
 		if(dataRead[0]=='\0') // если пусто - делать пока нечего.
 		{
@@ -306,19 +309,28 @@ void Interracting(String data="") // функци€ взаимодействи€ с роботом.
 			return;
 		}
 		s=dataRead;
-    }
+    //}
 
 	SDIAppForm->Memo1->Lines->Add("get:"); // дл€ протокола и отладки выводим полученную строку на экран
 	SDIAppForm->Memo1->Lines->Add(s);
 	command=strtok(dataRead," \n\r"); // распознаем команду
+
+	String dataGS=strtok(NULL," \n\r");
 	data1=strtok(NULL," \n\r");       // выдел€ем первую координату
 	data2=strtok(NULL," \n\r");       // вторую координату
 	data3=strtok(NULL," \n\r");       // и третий параметр, если есть
-	String next=strtok(NULL,""); // другие команды если есть
+	//String next=strtok(NULL,""); // другие команды если есть
 
 
+	if(command==NULL)
+	return;
+	if(command=="Hinyt" || command=="test")
+	 {
+	 char temp='A';
+		 SendData(&temp);
+     }
 
-	if(data3.Length()!=0) // если это установка параметра
+	if(dataGS=="s") // если это установка параметра
 	{
 	int d3=StrToInt(data3);
 	char temp='A';
@@ -355,7 +367,7 @@ void Interracting(String data="") // функци€ взаимодействи€ с роботом.
 	}
 	else // если это получение параметра
 	{
-	data2=data2.SubString(1,data2.Length()-1);
+	//data2=data2.SubString(1,data2.Length()-1);   //------------------------------
 		if(command=="start") // начало работы.
 		{
 			char temp=StrToInt(SDIAppForm->Edit3->Text);
@@ -363,7 +375,7 @@ void Interracting(String data="") // функци€ взаимодействи€ с роботом.
 				started=1;
 			SendData(&temp);
 		}
-		if(command=="jobisdone?") // окончание работы
+		if(command=="jbsdne") // окончание работы
 		{
 			char temp=StrToInt(SDIAppForm->Edit4->Text);
 			SendData(&temp);
@@ -393,8 +405,9 @@ void Interracting(String data="") // функци€ взаимодействи€ с роботом.
         {
            for(int j=-1;j<=1;j++)//----------------------------------------------------------------------------------------------------------------------!!!!!
 			  { //
+				if(StrToInt(data2)+j<0 || StrToInt(data1)+i<0) continue;
 				  if(i==0 && j==0) continue;
-                  temp=H[StrToInt(data1)+i][StrToInt(data2)+j]+h_evr[StrToInt(data1)+i][StrToInt(data2)+j];//getParam("H+hevr",cX+i,cY+j);
+				  temp=H[StrToInt(data1)+i][StrToInt(data2)+j]+h_evr[StrToInt(data1)+i][StrToInt(data2)+j];//getParam("H+hevr",cX+i,cY+j);
 				  if(temp<min) //
 				  {            //
 					 min=temp;
@@ -411,10 +424,6 @@ void Interracting(String data="") // функци€ взаимодействи€ с роботом.
 			char temp1=cyy;
 			SendData(&temp1);
         }
-	}
-	if(next!="" && next!=" ")
-	{
-	Interracting(next);
 	}
 
 	}
